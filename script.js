@@ -104,59 +104,8 @@ function handleNoClick() {
 
 // ===== YES BUTTON CLICK =====
 function handleYesClick() {
-    // Hide the main container
-    document.querySelector('.container').style.display = 'none';
-    
-    // Show the modal
-    document.getElementById('yes-modal').style.display = 'flex';
-    
-    // Trigger heart spill animation after envelope opens
-    setTimeout(createHeartSpill, 2000);
-    
-    // Optional: Play a sound effect (uncomment if you add a sound file)
-    /*
-    const yesSound = new Audio('assets/yes-sound.mp3');
-    yesSound.volume = 0.5;
-    yesSound.play().catch(e => console.log("Audio autoplay prevented:", e));
-    */
-}
-
-// ===== CREATE HEARTS SPILL ANIMATION =====
-function createHeartSpill() {
-    const container = document.getElementById('hearts-spill-container');
-    const heartCount = 150; // 150 hearts for maximum overwhelm! ❤️❤️❤️
-    
-    // Array of different heart emojis for variety
-    const hearts = ['❤️', '💖', '💗', '💓', '💕', '💘', '💝', '💟'];
-    
-    for (let i = 0; i < heartCount; i++) {
-        setTimeout(() => {
-            const heart = document.createElement('div');
-            heart.className = 'heart-spill';
-            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
-            
-            // Random position and rotation - make them spill everywhere!
-            const startX = 45 + Math.random() * 10; // Start from envelope center area
-            const endX = (Math.random() - 0.5) * 600; // Wider spread for overwhelm effect
-            const endY = 150 + Math.random() * 450; // Fall further down
-            const rotate = (Math.random() - 0.5) * 1080; // More rotation
-            const size = 0.8 + Math.random() * 1.2; // Vary heart sizes
-            
-            heart.style.setProperty('--tx', `${endX}px`);
-            heart.style.setProperty('--ty', `${endY}px`);
-            heart.style.setProperty('--rotate', `${rotate}deg`);
-            heart.style.left = `${startX}%`;
-            heart.style.top = '45%';
-            heart.style.transform = `scale(${size})`;
-            
-            container.appendChild(heart);
-            
-            // Remove heart after animation
-            setTimeout(() => {
-                heart.remove();
-            }, 3100);
-        }, i * 20); // Faster stagger for continuous flow
-    }
+    // REDIRECT to yes.html (this is the critical change!)
+    window.location.href = 'yes.html';
 }
 
 // ===== MUSIC TOGGLE =====
@@ -193,7 +142,7 @@ document.addEventListener('click', () => {
 
 // ===== PREVENT ACCIDENTAL NAVIGATION =====
 window.addEventListener('beforeunload', (e) => {
-    if (noCount > 0 && document.getElementById('yes-modal').style.display === 'none') {
+    if (noCount > 0) {
         e.preventDefault();
         e.returnValue = '';
     }
