@@ -63,15 +63,15 @@ function handleNoClick() {
     
     // Array of teasing messages
     const messages = [
-        "Are you sure? 🥺",
-        "Really? Think again! 😢",
-        "Don't be like that! 😭",
-        "You're breaking my heart! 💔",
+        "Babe, are you sure? 🥺",
+        "Really? Please think again! 😢",
+        "Mama, don't be like that! 🥺🥺🥺",
+        "You're breaking my heart! 💔😭😭😭",
         "Last chance! 😉",
         "You're so mean! 😤",
         "I'll keep asking! 😠",
         "Fine, I'll make the YES bigger! 😏",
-        "You can't escape! 😈",
+        "You can't escape my love Matrix! 😈",
         "Okay, this is getting ridiculous! 😂"
     ];
     
