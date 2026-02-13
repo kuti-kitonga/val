@@ -1,145 +1,200 @@
-const gifStages = [
-    "https://media.tenor.com/EBV7OT7ACfwAAAAj/u-u-qua-qua-u-quaa.gif",    // 0 normal
-    "https://media1.tenor.com/m/uDugCXK4vI4AAAAd/chiikawa-hachiware.gif",  // 1 confused
-    "https://media.tenor.com/f_rkpJbH1s8AAAAj/somsom1012.gif",             // 2 pleading
-    "https://media.tenor.com/OGY9zdREsVAAAAAj/somsom1012.gif",             // 3 sad
-    "https://media1.tenor.com/m/WGfra-Y_Ke0AAAAd/chiikawa-sad.gif",       // 4 sadder
-    "https://media.tenor.com/CivArbX7NzQAAAAj/somsom1012.gif",             // 5 devastated
-    "https://media.tenor.com/5_tv1HquZlcAAAAj/chiikawa.gif",               // 6 very devastated
-    "https://media1.tenor.com/m/uDugCXK4vI4AAAAC/chiikawa-hachiware.gif"  // 7 crying runaway
-]
+// ===== HEARTS BACKGROUND ANIMATION =====
+function createHeart(x, y, size) {
+    const heart = document.createElement('div');
+    heart.className = 'heart';
+    heart.style.left = `${x}%`;
+    heart.style.top = `${y}%`;
+    heart.style.fontSize = `${size}px`;
+    heart.innerHTML = '❤️';
+    
+    document.querySelector('.hearts-bg').appendChild(heart);
+    
+    // Random animation duration and delay
+    const duration = 3 + Math.random() * 3;
+    const delay = Math.random() * 2;
+    
+    heart.style.animation = `float ${duration}s ease-in-out ${delay}s infinite`;
+    
+    // Remove heart after animation completes
+    setTimeout(() => {
+        heart.remove();
+    }, (duration + delay) * 1000);
+}
 
-const noMessages = [
-    "No",
-    "Are you positive? 🤔",
-    "Pookie please... 🥺",
-    "If you say no, I will be really sad...",
-    "I will be very sad... 😢",
-    "Please??? 💔",
-    "Don't do this to me...",
-    "Last chance! 😭",
-    "You can't catch me anyway 😜"
-]
-
-const yesTeasePokes = [
-    "try saying no first... I bet you want to know what happens 😏",
-    "go on, hit no... just once 👀",
-    "you're missing out 😈",
-    "click no, I dare you 😏"
-]
-
-let yesTeasedCount = 0
-
-let noClickCount = 0
-let runawayEnabled = false
-let musicPlaying = true
-
-const catGif = document.getElementById('cat-gif')
-const yesBtn = document.getElementById('yes-btn')
-const noBtn = document.getElementById('no-btn')
-const music = document.getElementById('bg-music')
-
-// Autoplay: audio starts muted (bypasses browser policy), unmute immediately
-music.muted = true
-music.volume = 0.3
-music.play().then(() => {
-    music.muted = false
-}).catch(() => {
-    // Fallback: unmute on first interaction
-    document.addEventListener('click', () => {
-        music.muted = false
-        music.play().catch(() => {})
-    }, { once: true })
-})
-
-function toggleMusic() {
-    if (musicPlaying) {
-        music.pause()
-        musicPlaying = false
-        document.getElementById('music-toggle').textContent = '🔇'
-    } else {
-        music.muted = false
-        music.play()
-        musicPlaying = true
-        document.getElementById('music-toggle').textContent = '🔊'
+// Create multiple hearts on page load
+window.addEventListener('load', () => {
+    for (let i = 0; i < 30; i++) {
+        setTimeout(() => {
+            const x = Math.random() * 100;
+            const y = Math.random() * 100;
+            const size = 10 + Math.random() * 20;
+            createHeart(x, y, size);
+        }, i * 200);
     }
-}
+});
 
-function handleYesClick() {
-    if (!runawayEnabled) {
-        // Tease her to try No first
-        const msg = yesTeasePokes[Math.min(yesTeasedCount, yesTeasePokes.length - 1)]
-        yesTeasedCount++
-        showTeaseMessage(msg)
-        return
+// Add floating animation to CSS via JS (fallback)
+const style = document.createElement('style');
+style.innerHTML = `
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0) rotate(0deg);
+            opacity: 0.6;
+        }
+        50% {
+            transform: translateY(-20px) rotate(10deg);
+            opacity: 1;
+        }
     }
-    window.location.href = 'yes.html'
-}
+    .heart {
+        position: absolute;
+        animation-fill-mode: forwards;
+        pointer-events: none;
+    }
+`;
+document.head.appendChild(style);
 
-function showTeaseMessage(msg) {
-    let toast = document.getElementById('tease-toast')
-    toast.textContent = msg
-    toast.classList.add('show')
-    clearTimeout(toast._timer)
-    toast._timer = setTimeout(() => toast.classList.remove('show'), 2500)
-}
+// ===== NO BUTTON GROWING =====
+let noCount = 0;
+const maxNoCount = 10; // Stop growing after 10 clicks
 
 function handleNoClick() {
-    noClickCount++
-
-    // Cycle through guilt-trip messages
-    const msgIndex = Math.min(noClickCount, noMessages.length - 1)
-    noBtn.textContent = noMessages[msgIndex]
-
-    // Grow the Yes button bigger each time
-    const currentSize = parseFloat(window.getComputedStyle(yesBtn).fontSize)
-    yesBtn.style.fontSize = `${currentSize * 1.35}px`
-    const padY = Math.min(18 + noClickCount * 5, 60)
-    const padX = Math.min(45 + noClickCount * 10, 120)
-    yesBtn.style.padding = `${padY}px ${padX}px`
-
-    // Shrink No button to contrast
-    if (noClickCount >= 2) {
-        const noSize = parseFloat(window.getComputedStyle(noBtn).fontSize)
-        noBtn.style.fontSize = `${Math.max(noSize * 0.85, 10)}px`
-    }
-
-    // Swap cat GIF through stages
-    const gifIndex = Math.min(noClickCount, gifStages.length - 1)
-    swapGif(gifStages[gifIndex])
-
-    // Runaway starts at click 5
-    if (noClickCount >= 5 && !runawayEnabled) {
-        enableRunaway()
-        runawayEnabled = true
-    }
-}
-
-function swapGif(src) {
-    catGif.style.opacity = '0'
+    noCount++;
+    
+    // Array of teasing messages
+    const messages = [
+        "Are you sure? 🥺",
+        "Really? Think again! 😢",
+        "Don't be like that! 😭",
+        "You're breaking my heart! 💔",
+        "Last chance! 😉",
+        "You're so mean! 😤",
+        "I'll keep asking! 😠",
+        "Fine, I'll make the YES bigger! 😏",
+        "You can't escape! 😈",
+        "Okay, this is getting ridiculous! 😂"
+    ];
+    
+    // Show toast message
+    const toast = document.getElementById('tease-toast');
+    toast.textContent = messages[Math.min(noCount - 1, messages.length - 1)];
+    toast.style.opacity = '1';
+    
+    // Reset toast after animation
     setTimeout(() => {
-        catGif.src = src
-        catGif.style.opacity = '1'
-    }, 200)
+        toast.style.opacity = '0';
+    }, 2800);
+    
+    // Make YES button bigger (but cap it)
+    if (noCount <= maxNoCount) {
+        const yesBtn = document.getElementById('yes-btn');
+        const newSize = 1 + (noCount * 0.15); // Grow by 15% each click
+        yesBtn.style.transform = `scale(${newSize})`;
+    }
+    
+    // Change GIF after certain clicks
+    if (noCount === 3) {
+        document.getElementById('cat-gif').src = 'https://media.tenor.com/JRnmVEv3kYAAAAAC/sad-crying.gif';
+    } else if (noCount === 6) {
+        document.getElementById('cat-gif').src = 'https://media.tenor.com/9wW0-YfL7DcAAAAAC/crying-sad.gif';
+    } else if (noCount === 9) {
+        document.getElementById('cat-gif').src = 'https://media.tenor.com/7Hx_bvEUhDwAAAAAC/angry-mad.gif';
+    }
 }
 
-function enableRunaway() {
-    noBtn.addEventListener('mouseover', runAway)
-    noBtn.addEventListener('touchstart', runAway, { passive: true })
+// ===== YES BUTTON CLICK =====
+function handleYesClick() {
+    // Hide the main container
+    document.querySelector('.container').style.display = 'none';
+    
+    // Show the modal
+    document.getElementById('yes-modal').style.display = 'flex';
+    
+    // Trigger heart spill animation after envelope opens
+    setTimeout(createHeartSpill, 2000);
+    
+    // Optional: Play a sound effect (uncomment if you add a sound file)
+    /*
+    const yesSound = new Audio('assets/yes-sound.mp3');
+    yesSound.volume = 0.5;
+    yesSound.play().catch(e => console.log("Audio autoplay prevented:", e));
+    */
 }
 
-function runAway() {
-    const margin = 20
-    const btnW = noBtn.offsetWidth
-    const btnH = noBtn.offsetHeight
-    const maxX = window.innerWidth - btnW - margin
-    const maxY = window.innerHeight - btnH - margin
-
-    const randomX = Math.random() * maxX + margin / 2
-    const randomY = Math.random() * maxY + margin / 2
-
-    noBtn.style.position = 'fixed'
-    noBtn.style.left = `${randomX}px`
-    noBtn.style.top = `${randomY}px`
-    noBtn.style.zIndex = '50'
+// ===== CREATE HEARTS SPILL ANIMATION =====
+function createHeartSpill() {
+    const container = document.getElementById('hearts-spill-container');
+    const heartCount = 150; // 150 hearts for maximum overwhelm! ❤️❤️❤️
+    
+    // Array of different heart emojis for variety
+    const hearts = ['❤️', '💖', '💗', '💓', '💕', '💘', '💝', '💟'];
+    
+    for (let i = 0; i < heartCount; i++) {
+        setTimeout(() => {
+            const heart = document.createElement('div');
+            heart.className = 'heart-spill';
+            heart.innerHTML = hearts[Math.floor(Math.random() * hearts.length)];
+            
+            // Random position and rotation - make them spill everywhere!
+            const startX = 45 + Math.random() * 10; // Start from envelope center area
+            const endX = (Math.random() - 0.5) * 600; // Wider spread for overwhelm effect
+            const endY = 150 + Math.random() * 450; // Fall further down
+            const rotate = (Math.random() - 0.5) * 1080; // More rotation
+            const size = 0.8 + Math.random() * 1.2; // Vary heart sizes
+            
+            heart.style.setProperty('--tx', `${endX}px`);
+            heart.style.setProperty('--ty', `${endY}px`);
+            heart.style.setProperty('--rotate', `${rotate}deg`);
+            heart.style.left = `${startX}%`;
+            heart.style.top = '45%';
+            heart.style.transform = `scale(${size})`;
+            
+            container.appendChild(heart);
+            
+            // Remove heart after animation
+            setTimeout(() => {
+                heart.remove();
+            }, 3100);
+        }, i * 20); // Faster stagger for continuous flow
+    }
 }
+
+// ===== MUSIC TOGGLE =====
+let isMusicPlaying = false;
+
+function toggleMusic() {
+    const audio = document.getElementById('bg-music');
+    const toggleBtn = document.getElementById('music-toggle');
+    
+    if (isMusicPlaying) {
+        audio.pause();
+        toggleBtn.textContent = '🔇';
+        isMusicPlaying = false;
+    } else {
+        audio.muted = false;
+        audio.play().then(() => {
+            toggleBtn.textContent = '🔊';
+            isMusicPlaying = true;
+        }).catch(e => {
+            console.log("Audio autoplay prevented:", e);
+            alert("Music autoplay was blocked by your browser. Please click 'Yes' or 'No' first, then try the music button again!");
+        });
+    }
+}
+
+// ===== AUTOPLAY WORKAROUND =====
+// Browsers block autoplay with sound, so we wait for any user interaction
+document.addEventListener('click', () => {
+    const audio = document.getElementById('bg-music');
+    if (!isMusicPlaying) {
+        audio.muted = true; // Keep it muted initially
+    }
+}, { once: true });
+
+// ===== PREVENT ACCIDENTAL NAVIGATION =====
+window.addEventListener('beforeunload', (e) => {
+    if (noCount > 0 && document.getElementById('yes-modal').style.display === 'none') {
+        e.preventDefault();
+        e.returnValue = '';
+    }
+});
